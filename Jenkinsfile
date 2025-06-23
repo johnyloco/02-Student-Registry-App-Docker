@@ -14,22 +14,39 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Audit & Test in Parallel') {
+            parallel {
+                stage('Security Audit') {
+                    steps {
+                        bat 'npm audit'
+                    }
+                }
+
+                stage('Run Tests') {
+                    steps {
+                        bat 'npm run test'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
             steps {
-                bat 'npm test'
+                input message: 'Approve deployment?', ok: 'Deploy'
+                bat 'echo Deploying application...'  // Replace this with real deploy command
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finished.'
+            echo 'Pipeline completed'
         }
         success {
-            echo 'Build succeeded!'
+            echo 'Build succeeded'
         }
         failure {
-            echo 'Build failed.'
+            echo 'Build failed'
         }
     }
 }
